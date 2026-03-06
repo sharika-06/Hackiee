@@ -216,25 +216,29 @@ export default function StudentDashboard() {
                         return (
                             <button
                                 key={q.id}
-                                onClick={() => handleQuestionChange(q.id)}
                                 disabled={isLocked}
-                                className={`w-full p-4 rounded-2xl text-left transition-all group flex items-start justify-between gap-3 ${isLocked
-                                    ? 'opacity-50 cursor-not-allowed hidden'
+                                onClick={() => handleQuestionChange(q.id)}
+                                className={`w-full p-4 rounded-2xl text-left transition-all group flex items-center justify-between gap-3 ${isLocked
+                                    ? 'opacity-40 cursor-not-allowed hidden lg:flex'
                                     : currentQuestionId === q.id
-                                        ? 'bg-blue-500/10 border border-blue-500/20 block'
-                                        : 'hover:bg-white/[0.02] border border-transparent block'
+                                        ? 'bg-blue-500/10 border border-blue-500/20 flex'
+                                        : 'hover:bg-white/[0.02] border border-transparent flex'
                                     }`}
                             >
-                                <div className="space-y-1">
-                                    <p className={`text-sm font-bold flex items-center gap-2 ${currentQuestionId === q.id ? 'text-blue-400' : 'text-gray-300'}`}>
+                                <div className="space-y-1 overflow-hidden pr-2">
+                                    <p className={`text-sm font-bold flex items-center gap-2 truncate ${currentQuestionId === q.id ? 'text-blue-400' : 'text-gray-300'}`}>
                                         {q.title}
-                                        {levels[q.id]?.isCompleted && <Star size={10} className="text-yellow-400 fill-yellow-400" />}
+                                        {levels[q.id]?.isCompleted && <Star size={10} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />}
                                     </p>
-                                    <p className="text-[10px] text-gray-500 line-clamp-1">
+                                    <p className={`text-[10px] ${isLocked ? 'text-gray-600' : 'text-gray-500'} line-clamp-1`}>
                                         {q.id.split('-').join(' ')}
                                     </p>
                                 </div>
-                                <ChevronRight size={14} className={`${currentQuestionId === q.id ? 'text-blue-400' : 'text-gray-700 opacity-0 group-hover:opacity-100'} transition-all`} />
+                                {isLocked ? (
+                                    <Lock size={14} className="text-gray-600 flex-shrink-0" />
+                                ) : (
+                                    <ChevronRight size={14} className={`${currentQuestionId === q.id ? 'text-blue-400' : 'text-gray-700 opacity-0 group-hover:opacity-100'} transition-all flex-shrink-0`} />
+                                )}
                             </button>
                         );
                     })}
@@ -330,17 +334,56 @@ export default function StudentDashboard() {
                                 <Fingerprint size={14} className="text-blue-400" />
                                 Neural Skill Analytics
                             </h3>
-                            <SkillChart data={score} />
-                            <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
-                                <div className="text-center">
-                                    <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Accuracy</p>
-                                    <p className="text-xl font-black text-white">---</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Efficiency</p>
-                                    <p className="text-xl font-black text-white">---</p>
-                                </div>
-                            </div>
+                            {(() => {
+                                const isCompleted = levels[currentQuestionId]?.isCompleted;
+                                const finalScore = levels[currentQuestionId]?.score || 0;
+
+                                // Safe-check the code string since template might be loading initially
+                                const currentCode = code || '';
+
+                                // Real-time simulated heuristics
+                                const currentCodeLength = currentCode.length;
+                                const structureElements = (currentCode.match(/[{}[\]();=+\-*/]/g) || []).length;
+
+                                // Dynamic logic (Accuracy) goes up as they write more code, maxing near 95 before verification
+                                const liveLogic = Math.min(95, 20 + Math.floor(currentCodeLength / 4) + (structureElements * 2));
+
+                                // Dynamic performance (Efficiency) fluctuates. Too many keystrokes drops it locally.
+                                const livePerformance = Math.max(30, Math.min(98, 100 - Math.floor(keystrokes / 15) + structureElements));
+
+                                // Dynamic syntax goes up as they add structural elements
+                                const liveSyntax = Math.min(96, 40 + (structureElements * 3));
+
+                                // AI Independence drops immediately if they paste or switch tabs
+                                const liveIndependence = Math.max(0, 100 - (pasteCount * 25) - (tabSwitches * 15));
+
+                                const chartData = {
+                                    syntax: isCompleted ? Math.min(100, finalScore + 10) : liveSyntax,
+                                    logic: isCompleted ? finalScore : liveLogic,
+                                    performance: isCompleted ? Math.min(100, finalScore + 5) : livePerformance,
+                                    aiIndependence: isCompleted ? Math.max(0, 100 - (pasteCount * 15) - (tabSwitches * 10)) : liveIndependence
+                                };
+
+                                return (
+                                    <>
+                                        <SkillChart data={chartData} />
+                                        <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
+                                            <div className="text-center">
+                                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Accuracy</p>
+                                                <p className={`text-xl font-black ${isCompleted ? 'text-white' : 'text-blue-400/80 animate-pulse'}`}>
+                                                    {isCompleted ? `${chartData.logic}%` : `${Math.round(chartData.logic)}%`}
+                                                </p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Efficiency</p>
+                                                <p className={`text-xl font-black ${isCompleted ? 'text-white' : 'text-blue-400/80 animate-pulse'}`}>
+                                                    {isCompleted ? `${chartData.performance}%` : `${Math.round(chartData.performance)}%`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </>
+                                );
+                            })()}
                         </div>
 
                         <div className="glass p-6 rounded-3xl border border-white/10">

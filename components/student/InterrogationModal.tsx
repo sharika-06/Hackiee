@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useIntegrityStore } from '@/lib/store';
-import { ShieldAlert, Mic, Send, Lock, Keyboard, Clipboard, Layout, CheckCircle, Star } from 'lucide-react';
+import { ShieldAlert, Mic, Send, Lock, Keyboard, Clipboard, Layout, CheckCircle, Star, AlertCircle, Target, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QUESTIONS } from '@/lib/questions';
 
@@ -33,6 +33,9 @@ export default function InterrogationModal({
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [earnedStars, setEarnedStars] = useState(0);
     const [earnedScore, setEarnedScore] = useState(0);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+    const [aiIsCorrect, setAiIsCorrect] = useState<boolean | null>(null);
     const modalRef = useRef<HTMLDivElement>(null);
 
     const currentQuestion = QUESTIONS.find(q => q.id === questionId) || QUESTIONS[0];
@@ -85,17 +88,17 @@ export default function InterrogationModal({
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="max-w-md w-full glass border-white/10 p-8 text-center space-y-8"
+                        className="max-w-[600px] w-full glass border-white/10 p-6 text-center space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar"
                     >
-                        <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto border border-green-500/50 shadow-2xl shadow-green-500/20 mb-4">
-                            <CheckCircle size={40} className="text-green-500" />
+                        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto border border-green-500/50 shadow-2xl shadow-green-500/20 mb-2">
+                            <CheckCircle size={32} className="text-green-500" />
                         </div>
 
-                        <div className="space-y-4">
-                            <h2 className="text-3xl font-bold text-white tracking-tight">Integrity Report</h2>
-                            <p className="text-gray-400 text-sm">Session Bio-Metric Correlation Complete</p>
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Integrity Report</h2>
+                            <p className="text-gray-400 text-xs">Session Bio-Metric Correlation Complete</p>
 
-                            <div className="flex justify-center gap-2 my-4">
+                            <div className="flex justify-center gap-2 my-2">
                                 {[...Array(5)].map((_, i) => (
                                     <motion.div
                                         key={i}
@@ -104,62 +107,104 @@ export default function InterrogationModal({
                                         transition={{ delay: i * 0.15 + 0.5, type: "spring" }}
                                     >
                                         <Star
-                                            size={32}
+                                            size={24}
                                             className={i < earnedStars ? "text-yellow-400 fill-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" : "text-gray-700"}
                                         />
                                     </motion.div>
                                 ))}
                             </div>
-                            <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                            <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
                                 {earnedScore}% Mastery Achieved
                             </p>
                             {earnedScore >= 50 && (
-                                <p className="text-xs text-green-400 font-bold uppercase tracking-widest mt-2 animate-pulse">
+                                <p className="text-[10px] text-green-400 font-bold uppercase tracking-widest mt-1 animate-pulse">
                                     Next Stage Unlocked!
                                 </p>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="glass p-4 rounded-2xl border-white/5 bg-white/[0.02] text-left">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Keyboard size={14} className="text-blue-400" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Typed</span>
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="glass p-3 rounded-xl border-white/5 bg-white/[0.02] text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Keyboard size={12} className="text-blue-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Typed</span>
                                 </div>
-                                <p className="text-2xl font-black text-white">{keystrokes}</p>
-                                <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">Keystrokes</p>
+                                <p className="text-xl font-black text-white">{keystrokes}</p>
+                                <p className="text-[8px] text-gray-600 font-bold uppercase mt-1">Keystrokes</p>
                             </div>
-                            <div className="glass p-4 rounded-2xl border-white/5 bg-white/[0.02] text-left">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Clipboard size={14} className="text-orange-400" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Pasted</span>
+                            <div className="glass p-3 rounded-xl border-white/5 bg-white/[0.02] text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Clipboard size={12} className="text-orange-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Pasted</span>
                                 </div>
-                                <p className="text-2xl font-black text-white">{pasteCount}</p>
-                                <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">Events</p>
+                                <p className="text-xl font-black text-white">{pasteCount}</p>
+                                <p className="text-[8px] text-gray-600 font-bold uppercase mt-1">Events</p>
                             </div>
-                            <div className="glass p-4 rounded-2xl border-white/5 bg-white/[0.02] text-left col-span-2">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Layout size={14} className="text-red-400" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Tab Switches</span>
+                            <div className="glass p-3 rounded-xl border-white/5 bg-white/[0.02] text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Layout size={12} className="text-red-400" />
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Tab Switches</span>
                                 </div>
                                 <div className="flex items-end justify-between">
-                                    <p className="text-2xl font-black text-white">{tabSwitches}</p>
-                                    <p className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase ${tabSwitches > 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20'}`}>
+                                    <p className="text-xl font-black text-white">{tabSwitches}</p>
+                                    <p className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase ${tabSwitches > 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-green-500/10 text-green-500 border-green-500/20'}`}>
                                         {tabSwitches === 0 ? 'Optimal' : 'Compromised'}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <button
-                            onClick={() => {
-                                setInterrogationPending(false);
-                                onClose();
-                            }}
-                            className="w-full premium-gradient rounded-xl py-4 font-bold hover:opacity-90 transition-all text-white shadow-xl shadow-blue-500/20"
-                        >
-                            Return to Level Map
-                        </button>
+                        {/* AI Verification Feedback Panel */}
+                        {aiFeedback && aiIsCorrect === false && (
+                            <div className="mt-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-bottom-4 text-left">
+                                <div className="p-1.5 bg-red-500/20 rounded-lg shrink-0 mt-0.5">
+                                    <AlertCircle size={14} className="text-red-400" />
+                                </div>
+                                <div>
+                                    <h4 className="text-red-500 font-bold mb-1 text-xs">Code Needs Improvement</h4>
+                                    <p className="text-[11px] text-red-400/80 leading-relaxed max-h-24 overflow-y-auto pr-2 custom-scrollbar">{aiFeedback}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {aiFeedback && aiIsCorrect === true && (
+                            <div className="mt-3 bg-green-500/10 border border-green-500/20 p-3 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-bottom-4 text-left">
+                                <div className="p-1.5 bg-green-500/20 rounded-lg shrink-0 mt-0.5">
+                                    <Target size={14} className="text-green-400" />
+                                </div>
+                                <div>
+                                    <h4 className="text-green-500 font-bold mb-1 text-xs">Code Verified Successfully!</h4>
+                                    <p className="text-[11px] text-green-400/80 leading-relaxed max-h-24 overflow-y-auto pr-2 custom-scrollbar">{aiFeedback}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mt-4 flex gap-3">
+                            {aiIsCorrect === false ? (
+                                <button
+                                    onClick={() => {
+                                        setInterrogationPending(false);
+                                        onClose();
+                                    }}
+                                    className="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl py-2.5 font-bold transition-all text-red-400 shadow-xl text-xs"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <RefreshCw size={14} />
+                                        Return to Editor & Retry
+                                    </div>
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setInterrogationPending(false);
+                                        onClose();
+                                    }}
+                                    className="w-full premium-gradient rounded-xl py-2.5 font-bold hover:opacity-90 transition-all text-white shadow-xl shadow-blue-500/20 text-xs"
+                                >
+                                    Return to Level Map
+                                </button>
+                            )}
+                        </div>
                     </motion.div>
                 </div>
             </AnimatePresence>
@@ -217,33 +262,100 @@ export default function InterrogationModal({
                                         Use Voice Explanation
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            // 1. Calculate a mock score based on metrics
-                                            let calculatedScore = 100;
-                                            if (pasteCount > 0) calculatedScore -= (pasteCount * 15);
-                                            if (tabSwitches > 0) calculatedScore -= (tabSwitches * 10);
-                                            if (keystrokes < 20) calculatedScore -= 30; // Suspiciously low typing
-                                            if (answer.length < 10) calculatedScore -= 20; // Poor logic answer
+                                        onClick={async () => {
+                                            if (isVerifying) return;
 
-                                            calculatedScore = Math.max(0, Math.min(100, calculatedScore));
+                                            // Reset validation states
+                                            setIsVerifying(true);
+                                            setAiFeedback(null);
+                                            setAiIsCorrect(null);
 
-                                            // 2. Calculate stars (1 star per 20%)
-                                            const stars = Math.ceil(calculatedScore / 20);
+                                            try {
+                                                const res = await fetch('/api/verify-code', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        code: submittedCode,
+                                                        questionId: questionId,
+                                                        language: "JavaScript" // Assuming currently active language, can be passed down later
+                                                    })
+                                                });
 
-                                            // 3. Find next question ID
-                                            const currentIndex = QUESTIONS.findIndex(q => q.id === questionId);
-                                            const nextQuestionId = currentIndex < QUESTIONS.length - 1 ? QUESTIONS[currentIndex + 1].id : null;
+                                                const data = await res.json();
 
-                                            // 4. Update state
-                                            setEarnedScore(calculatedScore);
-                                            setEarnedStars(stars);
-                                            completeLevel(questionId, nextQuestionId, calculatedScore, stars);
-                                            setIsSubmitted(true);
+                                                if (res.ok) {
+                                                    // Parse the functional score from the AI
+                                                    const aiScore = Number(data.score) || 0;
+                                                    const isFunctionallyCorrect = aiScore >= 50;
+
+                                                    setAiIsCorrect(isFunctionallyCorrect);
+                                                    setAiFeedback(data.feedback);
+
+                                                    // 1. Calculate an integrity score modifier based on metrics
+                                                    let integrityModifier = 100;
+                                                    if (pasteCount > 0) integrityModifier -= (pasteCount * 15);
+                                                    if (tabSwitches > 0) integrityModifier -= (tabSwitches * 10);
+                                                    if (keystrokes < 20) integrityModifier -= 30; // Suspiciously low typing
+                                                    if (answer.length < 10) integrityModifier -= 20; // Poor logic answer
+
+                                                    integrityModifier = Math.max(0, Math.min(100, integrityModifier));
+
+                                                    // 2. Blend AI code score with localized integrity modifiers (50/50 weighting)
+                                                    const combinedScore = Math.floor(
+                                                        (aiScore * 0.5) + (integrityModifier * 0.5)
+                                                    );
+
+                                                    // Only completely fail them if the AI says the code is incorrect
+                                                    const finalScore = isFunctionallyCorrect ? Math.max(combinedScore, aiScore) : 0;
+
+                                                    // 3. Calculate stars (1 star per 20%)
+                                                    const stars = Math.ceil(finalScore / 20);
+
+                                                    // 4. Find next question ID
+                                                    const currentIndex = QUESTIONS.findIndex(q => q.id === questionId);
+                                                    const nextQuestionId = currentIndex < QUESTIONS.length - 1 ? QUESTIONS[currentIndex + 1].id : null;
+
+                                                    // 5. Update state
+                                                    setEarnedScore(finalScore);
+                                                    setEarnedStars(stars);
+
+                                                    // Only unlock next level if score >= 50
+                                                    if (finalScore >= 50) {
+                                                        completeLevel(questionId, nextQuestionId, finalScore, stars);
+                                                    } else {
+                                                        // They failed either code or integrity check, mark as completed but without next unlock
+                                                        completeLevel(questionId, null, finalScore, stars);
+                                                    }
+                                                    setIsSubmitted(true);
+                                                } else {
+                                                    setAiIsCorrect(false);
+                                                    setAiFeedback(data.error || "An error occurred verifying your code.");
+                                                    setIsSubmitted(true);
+                                                }
+                                            } catch (err) {
+                                                console.error("Verification error:", err);
+                                                setAiIsCorrect(false);
+                                                setAiFeedback("Network error verifying code. Make sure you have GEMINI_API_KEY in .env.local");
+                                                setIsSubmitted(true);
+                                            } finally {
+                                                setIsVerifying(false);
+                                            }
                                         }}
-                                        className="flex-1 premium-gradient rounded-xl py-3 flex items-center justify-center gap-2 text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-blue-500/10"
+                                        disabled={isVerifying}
+                                        className={`flex-1 rounded-xl py-3 flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-lg shadow-blue-500/10 ${isVerifying ? 'bg-blue-500/50 cursor-not-allowed opacity-70 border border-blue-500/20' : 'premium-gradient hover:opacity-90'
+                                            }`}
                                     >
-                                        <Send size={18} />
-                                        Verify & Submit
+                                        {isVerifying ? (
+                                            <div className="flex justify-center items-center gap-3">
+                                                <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                                                <span>Validating...</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Send size={18} />
+                                                Verify & Submit
+                                            </div>
+                                        )}
                                     </button>
                                 </div>
                             </div>

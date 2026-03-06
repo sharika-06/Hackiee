@@ -1,4 +1,5 @@
 import React from 'react';
+import StudentProfileMenu from '@/components/student/StudentProfileMenu';
 
 export default function StudentLayout({
     children,
@@ -14,7 +15,7 @@ export default function StudentLayout({
                 </div>
                 <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-400">Student Portal</span>
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/50 flex items-center justify-center text-xs">S</div>
+                    <StudentProfileMenu />
                 </div>
             </nav>
             <main>

@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Brain, User, Briefcase, ArrowRight, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { Shield, Brain, User, Briefcase, Building, ArrowRight, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [role, setRole] = useState<'student' | 'recruiter' | null>(null);
+  const [role, setRole] = useState<'student' | 'recruiter' | 'company' | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +21,10 @@ export default function LoginPage() {
     setTimeout(() => {
       if (role === 'student') {
         router.push('/student');
-      } else {
+      } else if (role === 'recruiter') {
         router.push('/recruiter');
+      } else if (role === 'company') {
+        router.push('/company');
       }
     }, 1500);
   };
@@ -125,6 +127,22 @@ export default function LoginPage() {
                       </div>
                       <ArrowRight size={20} className="text-gray-700 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
                     </button>
+
+                    <button
+                      onClick={() => setRole('company')}
+                      className="w-full glass border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all p-6 rounded-2xl text-left group flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                          <Building size={24} className="text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-white font-bold text-lg">I am a Company</p>
+                          <p className="text-gray-500 text-sm">Manage company profile and assessments</p>
+                        </div>
+                      </div>
+                      <ArrowRight size={20} className="text-gray-700 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -142,7 +160,7 @@ export default function LoginPage() {
 
                   <div className="space-y-2">
                     <h2 className="text-2xl font-bold text-white">
-                      Welcome back, {role === 'student' ? 'Developer' : 'Partner'}
+                      Welcome back, {role === 'student' ? 'Developer' : role === 'recruiter' ? 'Partner' : 'Company'}
                     </h2>
                     <p className="text-sm text-gray-500">Enter your credentials to access your dashboard</p>
                   </div>
@@ -157,8 +175,8 @@ export default function LoginPage() {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="name@company.com"
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-gray-700"
+                          placeholder={role === 'company' ? "name@company.com" : "name@example.com"}
+                          className={`w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none transition-all placeholder:text-gray-700 ${role === 'company' ? 'focus:border-emerald-500/50 group-focus-within:text-emerald-500' : 'focus:border-blue-500/50'}`}
                         />
                       </div>
                     </div>
@@ -166,14 +184,14 @@ export default function LoginPage() {
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-gray-400 pl-1">Access Token / Password</label>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-blue-500 transition-colors" size={20} />
+                        <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 transition-colors ${role === 'company' ? 'group-focus-within:text-emerald-500' : 'group-focus-within:text-blue-500'}`} size={20} />
                         <input
                           type={showPassword ? "text" : "password"}
                           required
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="••••••••••••"
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-gray-700"
+                          className={`w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none transition-all placeholder:text-gray-700 ${role === 'company' ? 'focus:border-emerald-500/50' : 'focus:border-blue-500/50'}`}
                         />
                         <button
                           type="button"
@@ -185,17 +203,22 @@ export default function LoginPage() {
                       </div>
                     </div>
 
+
+
                     <div className="flex items-center justify-between px-1">
                       <div className="flex items-center gap-2">
-                        <input type="checkbox" className="rounded bg-white/5 border-white/10 text-blue-500" />
+                        <input type="checkbox" className={`rounded bg-white/5 border-white/10 ${role === 'company' ? 'text-emerald-500' : 'text-blue-500'}`} />
                         <span className="text-xs text-gray-500">Remember session</span>
                       </div>
-                      <button type="button" className="text-xs text-blue-400 hover:text-blue-300 font-bold">Forgot access?</button>
+                      <button type="button" className={`text-xs hover:text-white font-bold transition-colors ${role === 'company' ? 'text-emerald-400' : 'text-blue-400'}`}>Forgot access?</button>
                     </div>
 
                     <button
                       disabled={isLoading}
-                      className="w-full premium-gradient text-white py-4 rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-3 mt-4 disabled:opacity-50"
+                      className={`w-full text-white py-4 rounded-2xl font-bold hover:shadow-2xl transition-all flex items-center justify-center gap-3 mt-4 disabled:opacity-50 ${role === 'company'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-emerald-500/30'
+                        : 'premium-gradient hover:shadow-blue-500/30'
+                        }`}
                     >
                       {isLoading ? (
                         <div className="flex items-center gap-2">

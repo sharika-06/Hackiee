@@ -105,7 +105,7 @@ export default function LoginPage() {
                           <User size={24} className="text-blue-400" />
                         </div>
                         <div>
-                          <p className="text-white font-bold text-lg">I am a Developer</p>
+                          <p className="text-white font-bold text-lg text-gradient">Developer</p>
                           <p className="text-gray-500 text-sm">Take assessments and verify skills</p>
                         </div>
                       </div>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                           <Briefcase size={24} className="text-indigo-400" />
                         </div>
                         <div>
-                          <p className="text-white font-bold text-lg">I am a Recruiter</p>
+                          <p className="text-white font-bold text-lg text-gradient">Recruiter</p>
                           <p className="text-gray-500 text-sm">Find and verify top talent</p>
                         </div>
                       </div>
@@ -137,7 +137,7 @@ export default function LoginPage() {
                           <Building size={24} className="text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-white font-bold text-lg">I am a Company</p>
+                          <p className="text-white font-bold text-lg text-gradient">Company</p>
                           <p className="text-gray-500 text-sm">Manage company profile and assessments</p>
                         </div>
                       </div>
@@ -160,7 +160,7 @@ export default function LoginPage() {
 
                   <div className="space-y-2">
                     <h2 className="text-2xl font-bold text-white">
-                      Welcome back, {role === 'student' ? 'Developer' : role === 'recruiter' ? 'Partner' : 'Company'}
+                      Welcome back, {role === 'student' ? 'Developer' : role === 'recruiter' ? 'Recruiter' : 'Company'}
                     </h2>
                     <p className="text-sm text-gray-500">Enter your credentials to access your dashboard</p>
                   </div>

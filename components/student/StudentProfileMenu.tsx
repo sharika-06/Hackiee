@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Settings, Shield, Moon, Bell, HelpCircle, LogOut } from 'lucide-react';
+import { User, Settings, Shield, Moon, Bell, HelpCircle, LogOut, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-export default function StudentProfileMenu() {
+interface StudentProfileMenuProps {
+    onOpenLeaderboard: () => void;
+}
+
+export default function StudentProfileMenu({ onOpenLeaderboard }: StudentProfileMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +55,16 @@ export default function StudentProfileMenu() {
 
                         {/* Menu Items */}
                         <div className="py-1">
+                            <button
+                                onClick={() => {
+                                    onOpenLeaderboard();
+                                    setIsOpen(false);
+                                }}
+                                className="w-full px-4 py-2 text-left flex items-center gap-3 text-sm hover:bg-white/10 transition-colors text-blue-400 font-bold"
+                            >
+                                <Trophy size={18} className="text-blue-400" />
+                                Leaderboard
+                            </button>
                             <button className="w-full px-4 py-2 text-left flex items-center gap-3 text-sm hover:bg-white/10 transition-colors">
                                 <Settings size={18} className="text-gray-300" />
                                 Account Settings
